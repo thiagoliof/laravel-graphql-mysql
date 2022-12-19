@@ -1,0 +1,66 @@
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+
+type Card{
+  id: ID!
+  name: String!
+  url: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type Game{
+  id: ID!
+  name: String!
+  card: Card!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type Query {
+  cards: [Card!]! @all
+  games: [Game!]! @all
+  game(name: String! @eq): [Game] @all
+  gameSession(id: ID! @eq): GameSession @find
+}   
+
+
+type Mutation {
+  createdCard(name: String!, url: String!): Card! @create
+  createdGame(input: CreateGameInput! @spread): Game @create
+  removeCardGameById(id: ID!): Game @delete
+  removeGameByName(name: String!): Game 
+  createGameSession (game_name: String!): GameSession
+  endGameSession (game_name: String!): GameSession
+  updateGameSession (game_name: String!, retries: Int!): GameSession
+}
+
+
+type GameSession{
+  id: ID!
+  game_name: String!
+  retries: Int!
+  numberOfPairs: Int!
+  state: StateSessionGameEnum
+}
+
+input CreateGameInput {
+  name: String!
+  card: CreateCardBelongsTo
+}
+
+input CreateCardBelongsTo {
+  connect: ID
+  create: CreateCardInput
+}
+
+input CreateCardInput {
+  name: String!
+}
+
+
+enum StateSessionGameEnum {
+  STARTED @enum(value: 1)
+  COMPLETED @enum(value: 2)
+}
